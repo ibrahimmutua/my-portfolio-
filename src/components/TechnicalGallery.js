@@ -4,19 +4,29 @@ import './TechnicalGallery.css';
 function TechnicalGallery() {
   const [galleryItems, setGalleryItems] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [imageErrors, setImageErrors] = useState({});
 
   const CATEGORIES = ['SolidWorks', 'PCB Design', 'IoT & Embedded', 'Hardware & Electronics'];
 
   useEffect(() => {
-    const savedItems = localStorage.getItem('technicalGallery');
-    if (savedItems) {
-      setGalleryItems(JSON.parse(savedItems));
+    try {
+      const savedItems = localStorage.getItem('technicalGallery');
+      if (savedItems) {
+        const items = JSON.parse(savedItems);
+        setGalleryItems(items);
+      }
+    } catch (error) {
+      console.error('Error loading gallery items:', error);
     }
   }, []);
 
   const filteredItems = selectedCategory === 'All' 
     ? galleryItems 
     : galleryItems.filter(item => item.category === selectedCategory);
+
+  const handleImageError = (index) => {
+    setImageErrors(prev => ({ ...prev, [index]: true }));
+  };
 
   return (
     <section className="technical-gallery">
@@ -52,7 +62,20 @@ function TechnicalGallery() {
           {filteredItems.map((item, index) => (
             <div key={index} className="gallery-card">
               <div className="gallery-image-container">
-                <img src={item.image} alt={item.title} className="gallery-image" />
+                {imageErrors[index] ? (
+                  <div className="image-placeholder">
+                    <p>📷</p>
+                    <p className="placeholder-text">Image Error</p>
+                  </div>
+                ) : (
+                  <img 
+                    src={item.image} 
+                    alt={item.title} 
+                    className="gallery-image"
+                    onError={() => handleImageError(index)}
+                    loading="lazy"
+                  />
+                )}
                 <div className="gallery-overlay">
                   <span className="category-badge">{item.category}</span>
                 </div>

@@ -83,28 +83,86 @@ function PortfolioManager() {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Check file size before compression
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File is too large (>5MB). Please choose a smaller image.');
+        return;
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => {
-        setNewProject({
-          ...newProject,
-          image: reader.result,
-          imagePreview: reader.result
+        // Compress the image
+        compressImage(reader.result, (compressedDataUrl) => {
+          setNewProject({
+            ...newProject,
+            image: compressedDataUrl,
+            imagePreview: compressedDataUrl
+          });
         });
       };
       reader.readAsDataURL(file);
     }
   };
 
-  // Handle gallery image upload
+  // Compress image to reduce localStorage size
+  const compressImage = (dataUrl, callback) => {
+    const img = new Image();
+    img.src = dataUrl;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      
+      // Resize if larger than 800px (mobile-friendly size)
+      const MAX_WIDTH = 800;
+      const MAX_HEIGHT = 800;
+      
+      if (width > height) {
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width;
+          width = MAX_WIDTH;
+        }
+      } else {
+        if (height > MAX_HEIGHT) {
+          width *= MAX_HEIGHT / height;
+          height = MAX_HEIGHT;
+        }
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      // Compress to JPEG with 70% quality to reduce size significantly
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      callback(compressedDataUrl);
+    };
+  };
+
+  // Handle gallery image upload with compression
   const handleGalleryImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Check file size before compression
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File is too large (>5MB). Please choose a smaller image.');
+        return;
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => {
-        setNewGalleryItem({
-          ...newGalleryItem,
-          image: reader.result,
-          imagePreview: reader.result
+        // Compress the image
+        compressImage(reader.result, (compressedDataUrl) => {
+          const originalSize = (reader.result.length / 1024).toFixed(2);
+          const compressedSize = (compressedDataUrl.length / 1024).toFixed(2);
+          console.log(`Image compressed: ${originalSize}KB → ${compressedSize}KB`);
+          
+          setNewGalleryItem({
+            ...newGalleryItem,
+            image: compressedDataUrl,
+            imagePreview: compressedDataUrl
+          });
         });
       };
       reader.readAsDataURL(file);
