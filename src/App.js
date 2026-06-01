@@ -7,6 +7,7 @@ import Projects from './components/Projects';
 import Contact from './components/Contact';
 import Chatbot from './components/Chatbot';
 import Footer from './components/Footer';
+import TechnicalGallery from './components/TechnicalGallery';
 import PortfolioManager from './components/PortfolioManager';
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
         {activeSection === 'about' && <About />}
         {activeSection === 'skills' && <Skills />}
         {activeSection === 'projects' && <Projects />}
+        {activeSection === 'gallery' && <TechnicalGallery />}
         {activeSection === 'contact' && <Contact />}
         {activeSection === 'chatbot' && <Chatbot />}
       </main>

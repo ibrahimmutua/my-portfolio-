@@ -31,6 +31,12 @@ function Header({ setActiveSection }) {
           </button>
           <button 
             className="nav-link" 
+            onClick={() => setActiveSection('gallery')}
+          >
+            📸 Gallery
+          </button>
+          <button 
+            className="nav-link" 
             onClick={() => setActiveSection('chatbot')}
           >
             AI Chat

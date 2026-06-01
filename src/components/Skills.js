@@ -29,7 +29,7 @@ function Skills() {
     },
     {
       category: 'Design & CAD',
-      skills: ['SolidWorks', 'CAD Design', 'CAM', '3D Modeling'],
+      skills: ['SolidWorks', 'CAD Design', 'CAM', '3D Modeling', 'Finite Element Analysis'],
       icon: '📐'
     },
     {

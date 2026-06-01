@@ -4,6 +4,7 @@ import './PortfolioManager.css';
 function PortfolioManager() {
   const [projects, setProjects] = useState([]);
   const [skills, setSkills] = useState([]);
+  const [galleryItems, setGalleryItems] = useState([]);
   const [newProject, setNewProject] = useState({
     title: '',
     description: '',
@@ -18,11 +19,21 @@ function PortfolioManager() {
     category: '',
     skills: []
   });
+  const [newGalleryItem, setNewGalleryItem] = useState({
+    title: '',
+    description: '',
+    category: 'SolidWorks',
+    image: null,
+    imagePreview: '',
+    date: new Date().toISOString().split('T')[0]
+  });
   const [techInput, setTechInput] = useState('');
   const [skillInput, setSkillInput] = useState('');
   const [activeTab, setActiveTab] = useState('projects');
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const GALLERY_CATEGORIES = ['SolidWorks', 'PCB Design', 'IoT & Embedded', 'Hardware & Electronics'];
 
   const ADMIN_PASSWORD = 'portfolio123'; // Simple password - change in production
 
@@ -32,8 +43,10 @@ function PortfolioManager() {
   useEffect(() => {
     const savedProjects = localStorage.getItem('portfolioProjects');
     const savedSkills = localStorage.getItem('portfolioSkills');
+    const savedGallery = localStorage.getItem('technicalGallery');
     if (savedProjects) setProjects(JSON.parse(savedProjects));
     if (savedSkills) setSkills(JSON.parse(savedSkills));
+    if (savedGallery) setGalleryItems(JSON.parse(savedGallery));
   }, []);
 
   // Save projects to localStorage
@@ -48,6 +61,12 @@ function PortfolioManager() {
     setSkills(updatedSkills);
   };
 
+  // Save gallery items to localStorage
+  const saveGalleryItems = (updatedItems) => {
+    localStorage.setItem('technicalGallery', JSON.stringify(updatedItems));
+    setGalleryItems(updatedItems);
+  };
+
   // Handle authentication
   const handleLogin = (e) => {
     e.preventDefault();
@@ -60,7 +79,7 @@ function PortfolioManager() {
     }
   };
 
-  // Handle image upload
+  // Handle image upload for projects
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -68,6 +87,22 @@ function PortfolioManager() {
       reader.onloadend = () => {
         setNewProject({
           ...newProject,
+          image: reader.result,
+          imagePreview: reader.result
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle gallery image upload
+  const handleGalleryImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewGalleryItem({
+          ...newGalleryItem,
           image: reader.result,
           imagePreview: reader.result
         });
@@ -168,6 +203,36 @@ function PortfolioManager() {
     saveSkills(updatedSkills);
   };
 
+  // Add new gallery item
+  const handleAddGalleryItem = (e) => {
+    e.preventDefault();
+    if (newGalleryItem.title && newGalleryItem.image) {
+      const item = {
+        ...newGalleryItem,
+        id: Date.now()
+      };
+      const updatedItems = [...galleryItems, item];
+      saveGalleryItems(updatedItems);
+      setNewGalleryItem({
+        title: '',
+        description: '',
+        category: 'SolidWorks',
+        image: null,
+        imagePreview: '',
+        date: new Date().toISOString().split('T')[0]
+      });
+      alert('Gallery item added successfully!');
+    } else {
+      alert('Please fill in title and upload an image');
+    }
+  };
+
+  // Delete gallery item
+  const deleteGalleryItem = (id) => {
+    const updatedItems = galleryItems.filter(item => item.id !== id);
+    saveGalleryItems(updatedItems);
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="portfolio-manager-container">
@@ -209,6 +274,12 @@ function PortfolioManager() {
           onClick={() => setActiveTab('skills')}
         >
           Skills
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'gallery' ? 'active' : ''}`}
+          onClick={() => setActiveTab('gallery')}
+        >
+          📸 Tech Gallery
         </button>
       </div>
 
@@ -440,6 +511,103 @@ function PortfolioManager() {
                   </div>
                   <button
                     onClick={() => deleteSkill(skill.id)}
+                    className="delete-btn"
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Technical Gallery Tab */}
+      {activeTab === 'gallery' && (
+        <div className="manager-content">
+          <div className="add-gallery-form">
+            <h3>Add Technical Work Image</h3>
+            <form onSubmit={handleAddGalleryItem}>
+              <div className="form-group">
+                <label>Project Title</label>
+                <input
+                  type="text"
+                  value={newGalleryItem.title}
+                  onChange={(e) => setNewGalleryItem({ ...newGalleryItem, title: e.target.value })}
+                  placeholder="e.g., Mechanical Assembly Design"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Description (optional)</label>
+                <textarea
+                  value={newGalleryItem.description}
+                  onChange={(e) => setNewGalleryItem({ ...newGalleryItem, description: e.target.value })}
+                  placeholder="Describe your work..."
+                  rows="3"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Category</label>
+                <select
+                  value={newGalleryItem.category}
+                  onChange={(e) => setNewGalleryItem({ ...newGalleryItem, category: e.target.value })}
+                  required
+                >
+                  {GALLERY_CATEGORIES.map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Date Created</label>
+                <input
+                  type="date"
+                  value={newGalleryItem.date}
+                  onChange={(e) => setNewGalleryItem({ ...newGalleryItem, date: e.target.value })}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Upload Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleGalleryImageUpload}
+                  required
+                />
+                {newGalleryItem.imagePreview && (
+                  <div className="image-preview">
+                    <img src={newGalleryItem.imagePreview} alt="Preview" />
+                  </div>
+                )}
+              </div>
+
+              <button type="submit" className="submit-btn">Add to Gallery</button>
+            </form>
+          </div>
+
+          <div className="gallery-list">
+            <h3>Your Technical Work ({galleryItems.length})</h3>
+            {galleryItems.length === 0 ? (
+              <p className="empty-message">No gallery items added yet</p>
+            ) : (
+              galleryItems.map((item) => (
+                <div key={item.id} className="gallery-item">
+                  <div className="gallery-item-image">
+                    <img src={item.image} alt={item.title} />
+                  </div>
+                  <div className="gallery-item-info">
+                    <h4>{item.title}</h4>
+                    <p className="gallery-category">{item.category}</p>
+                    {item.description && <p>{item.description}</p>}
+                    <p className="gallery-date">{new Date(item.date).toLocaleDateString()}</p>
+                  </div>
+                  <button
+                    onClick={() => deleteGalleryItem(item.id)}
                     className="delete-btn"
                   >
                     Delete

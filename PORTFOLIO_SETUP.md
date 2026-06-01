@@ -122,7 +122,28 @@ Edit color gradients in CSS files:
 1. **Name/Title**: `src/components/Header.js`
 2. **About**: `src/components/About.js`
 3. **Contact**: `src/components/Contact.js`
-4. **Projects**: Add via admin panel or edit `src/components/Projects.js`
+4. **Projects**: Add via admin panel or edit `src/component
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+s/Projects.js`
 5. **Skills**: Add via admin panel or edit `src/components/Skills.js`
 
 ### Change Admin Password:
